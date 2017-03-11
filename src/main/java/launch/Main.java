@@ -1,6 +1,7 @@
 package launch;
 
 import io.pivotal.labs.cfenv.CloudFoundryEnvironment;
+import io.pivotal.labs.cfenv.CloudFoundryEnvironmentException;
 import io.pivotal.labs.cfenv.CloudFoundryService;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.WebResourceSet;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Main {
@@ -41,7 +43,12 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        CloudFoundryEnvironment environment = new CloudFoundryEnvironment(System::getenv);
+        CloudFoundryEnvironment environment = null;
+        try {
+            environment = new CloudFoundryEnvironment(System::getenv);
+        } catch (CloudFoundryEnvironmentException e) {
+            //ignore -- must be running locally
+        }
 
         File root = getRootFolder();
         System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
@@ -107,9 +114,16 @@ public class Main {
     }
 
     private static ContextResource getResource(CloudFoundryEnvironment environment, String serviceName) {
-        CloudFoundryService service = environment.getService(serviceName);
 
-        Map<String, Object> credentials = service.getCredentials();
+        Map<String, Object> credentials = new HashMap<>();
+        if (environment != null) {
+            CloudFoundryService service = environment.getService(serviceName);
+            credentials = service.getCredentials();
+        } else {
+            credentials.put("jdbcUrl", "jdbc:mysql://localhost/mysql?useSSL=false");
+            credentials.put("username", "root");
+            credentials.put("password", "password");
+        }
 
         ContextResource resource = new ContextResource();
         resource.setName("jdbc/demo");
