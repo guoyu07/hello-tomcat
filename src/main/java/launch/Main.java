@@ -129,7 +129,7 @@ public class Main {
         resource.setName("jdbc/demo");
         resource.setAuth("Container");
         resource.setType("javax.sql.DataSource");
-        resource.setProperty("driverClassName","com.mysql.jdbc.Driver");
+        resource.setProperty("driverClassName","com.mysql.cj.jdbc.Driver");
         resource.setProperty("url", credentials.get("jdbcUrl"));
         resource.setProperty("factory", "org.apache.tomcat.jdbc.pool.DataSourceFactory");
         resource.setProperty("username", credentials.get(("username")));
