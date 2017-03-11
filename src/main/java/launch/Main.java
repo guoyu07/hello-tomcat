@@ -1,8 +1,5 @@
 package launch;
 
-import io.pivotal.labs.cfenv.CloudFoundryEnvironment;
-import io.pivotal.labs.cfenv.CloudFoundryEnvironmentException;
-import io.pivotal.labs.cfenv.CloudFoundryService;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.WebResourceSet;
 import org.apache.catalina.core.StandardContext;
@@ -14,6 +11,10 @@ import org.apache.tomcat.util.descriptor.web.ContextEnvironment;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.apache.tomcat.util.scan.Constants;
 import org.apache.tomcat.util.scan.StandardJarScanFilter;
+import org.springframework.cloud.Cloud;
+import org.springframework.cloud.CloudException;
+import org.springframework.cloud.CloudFactory;
+import org.springframework.cloud.service.common.MysqlServiceInfo;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -43,11 +44,12 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        CloudFoundryEnvironment environment = null;
+        CloudFactory cloudFactory = new CloudFactory();
+        Cloud cloud = null;
         try {
-            environment = new CloudFoundryEnvironment(System::getenv);
-        } catch (CloudFoundryEnvironmentException e) {
-            //ignore -- must be running locally
+            cloud = cloudFactory.getCloud();
+        } catch (CloudException e) {
+            //ignore
         }
 
         File root = getRootFolder();
@@ -106,24 +108,30 @@ public class Main {
         ctx.setResources(resources);
 
         ctx.getNamingResources().addEnvironment(getEnvironment());
-        ctx.getNamingResources().addResource(getResource(environment, "hello-db"));
+        ctx.getNamingResources().addResource(getResource(cloud, "hello-db"));
 
         tomcat.enableNaming();
         tomcat.start();
         tomcat.getServer().await();
     }
 
-    private static ContextResource getResource(CloudFoundryEnvironment environment, String serviceName) {
+    private static ContextResource getResource(Cloud cloud, String serviceName) {
 
         Map<String, Object> credentials = new HashMap<>();
-        if (environment != null) {
-            CloudFoundryService service = environment.getService(serviceName);
-            credentials = service.getCredentials();
+        if (cloud != null) {
+            System.out.println("We're in the cloud!");
+            MysqlServiceInfo service = (MysqlServiceInfo) cloud.getServiceInfo(serviceName);
+            credentials.put("jdbcUrl", service.getJdbcUrl());
+            credentials.put("username", service.getUserName());
+            credentials.put("password", service.getPassword());
         } else {
+            System.out.println("We're running locally!");
             credentials.put("jdbcUrl", "jdbc:mysql://localhost/mysql?useSSL=false");
             credentials.put("username", "root");
             credentials.put("password", "password");
         }
+
+        System.out.println(credentials);
 
         ContextResource resource = new ContextResource();
         resource.setName("jdbc/demo");
