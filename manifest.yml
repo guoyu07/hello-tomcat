@@ -1,0 +1,8 @@
+---
+applications:
+- name: hello-tomcat
+  memory: 1GB
+  buildpack: java_buildpack_offline
+  path: build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar
+services:
+  - hello-db

@@ -1,0 +1,56 @@
+buildscript {
+    ext {
+        buildNrLoc = project.hasProperty('buildNr') ? "${buildNr}" : "0.0.1-SNAPSHOT"
+
+    }
+    repositories {
+//        mavenLocal()
+//        jcenter()
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+//apply plugin: 'war'
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+jar {
+    manifest {
+        attributes("Main-Class": "launch.Main")
+    }
+}
+
+group = 'com.example'
+version = buildNrLoc
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories {
+//    mavenLocal()
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    compile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+    compile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
+    compile("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}")
+    compile("org.apache.tomcat:tomcat-jasper:${tomcatVersion}")
+    compile("org.apache.tomcat:tomcat-jasper-el:${tomcatVersion}")
+    compile("org.apache.tomcat:tomcat-jsp-api:${tomcatVersion}")
+    compile("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
+
+    compile group: 'io.pivotal.labs', name: 'cf-env', version: '0.0.1'
+
+    runtime('mysql:mysql-connector-java:6.0.5')
+}
+
+build.dependsOn('shadowJar')
