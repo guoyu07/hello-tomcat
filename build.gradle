@@ -17,7 +17,6 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-
 apply plugin: 'com.github.johnrengelman.shadow'
 
 jar {
@@ -53,6 +52,7 @@ dependencies {
     compile 'org.springframework.cloud:spring-cloud-localconfig-connector:1.2.3.RELEASE'
 
     runtime('mysql:mysql-connector-java:6.0.5')
+    runtime("org.apache.tomcat:tomcat-dbcp:${tomcatVersion}")
 }
 
 build.dependsOn('shadowJar')
