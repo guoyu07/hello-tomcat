@@ -16,7 +16,6 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-
 apply plugin: 'com.github.johnrengelman.shadow'
 
 jar {
@@ -52,3 +51,4 @@ dependencies {
 }
 
 build.dependsOn('shadowJar')
+assemble.dependsOn('shadowJar')
