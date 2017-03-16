@@ -22,8 +22,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class Main {
+    public static final String PREFIX_JDBC = "jdbc/";
+
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
+
+    private static final Object monitor = new Object();
+
+    private static volatile Cloud cloud;
 
     private static File getRootFolder() {
         try {
@@ -43,14 +51,6 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-
-        CloudFactory cloudFactory = new CloudFactory();
-        Cloud cloud = null;
-        try {
-            cloud = cloudFactory.getCloud();
-        } catch (CloudException e) {
-            //ignore
-        }
 
         File root = getRootFolder();
         System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
@@ -108,16 +108,17 @@ public class Main {
         ctx.setResources(resources);
 
         ctx.getNamingResources().addEnvironment(getEnvironment());
-        ctx.getNamingResources().addResource(getResource(cloud, "hello-db"));
+        ctx.getNamingResources().addResource(getResource("hello-db"));
 
         tomcat.enableNaming();
         tomcat.start();
         tomcat.getServer().await();
     }
 
-    private static ContextResource getResource(Cloud cloud, String serviceName) {
+    private static ContextResource getResource(String serviceName) {
 
         Map<String, Object> credentials = new HashMap<>();
+        Cloud cloud = getCloudInstance();
         if (cloud != null) {
             System.out.println("We're in the cloud!");
             MysqlServiceInfo service = (MysqlServiceInfo) cloud.getServiceInfo(serviceName);
@@ -134,7 +135,7 @@ public class Main {
         System.out.println(credentials);
 
         ContextResource resource = new ContextResource();
-        resource.setName("jdbc/demo");
+        resource.setName(PREFIX_JDBC + serviceName);
         resource.setAuth("Container");
         resource.setType("javax.sql.DataSource");
         resource.setProperty("driverClassName","com.mysql.cj.jdbc.Driver");
@@ -153,5 +154,21 @@ public class Main {
         env.setType("java.lang.String");
         env.setOverride(false);
         return env;
+    }
+
+    private static Cloud getCloudInstance() {
+        if (null == cloud) {
+            synchronized (monitor) {
+                if (null == cloud) {
+                    try {
+                        cloud = new CloudFactory().getCloud();
+                    } catch (CloudException e) {
+                        //ignore
+                        return null;
+                    }
+                }
+            }
+        }
+        return cloud;
     }
 }

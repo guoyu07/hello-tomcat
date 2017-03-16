@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
 
+import static launch.Main.PREFIX_JDBC;
+
 @WebServlet(
         name = "MyServlet", 
         urlPatterns = {"/hello"}
@@ -25,7 +27,7 @@ public class HelloServlet extends HttpServlet {
         try {
             InitialContext initialContext = new InitialContext();
             Context envContext = (Context) initialContext.lookup("java:/comp/env");
-            DataSource ds = (DataSource) envContext.lookup("jdbc/demo");
+            DataSource ds = (DataSource) envContext.lookup(PREFIX_JDBC + "hello-db");
             System.out.println(ds);
         }catch (Exception e){
             e.printStackTrace();
