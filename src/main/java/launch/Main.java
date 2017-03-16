@@ -79,10 +79,6 @@ public class Main {
         Main main = new Main();
         PropertySource source = main.locator.locate(main.environment);
 
-        Object bar = source.getProperty("foo");
-
-        logger.info("Foo is set to: " + bar);
-
         File root = main.getRootFolder();
         System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
         Tomcat tomcat = new Tomcat();
@@ -139,14 +135,17 @@ public class Main {
         ctx.setResources(resources);
 
         ctx.getNamingResources().addEnvironment(getEnvironment());
-        ctx.getNamingResources().addResource(getResource("hello-db"));
+        ctx.getNamingResources().addResource(getResource(source, "hello-db"));
 
         tomcat.enableNaming();
         tomcat.start();
         tomcat.getServer().await();
     }
 
-    private static ContextResource getResource(String serviceName) {
+    private static ContextResource getResource(PropertySource source, String serviceName) {
+        Object jdbcUrl = source.getProperty("jdbcUrl");
+
+        logger.info("jdbcUrl is set to: " + jdbcUrl);
 
         Map<String, Object> credentials = new HashMap<>();
         Cloud cloud = getCloudInstance();
@@ -158,9 +157,9 @@ public class Main {
             credentials.put("password", service.getPassword());
         } else {
             System.out.println("We're running locally!");
-            credentials.put("jdbcUrl", "jdbc:mysql://localhost/mysql?useSSL=false");
-            credentials.put("username", "root");
-            credentials.put("password", "password");
+            credentials.put("jdbcUrl", source.getProperty("jdbcUrl"));
+            credentials.put("username", source.getProperty("username"));
+            credentials.put("password", source.getProperty("password"));
         }
 
         System.out.println(credentials);
