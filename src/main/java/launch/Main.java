@@ -16,11 +16,10 @@ import org.springframework.cloud.CloudException;
 import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.config.client.ConfigClientProperties;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
-import org.springframework.cloud.config.environment.Environment;
 import org.springframework.cloud.service.common.MysqlServiceInfo;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 
@@ -50,7 +49,6 @@ public class Main {
     private Main() {
         ConfigClientProperties defaults = new ConfigClientProperties(this.environment);
         defaults.setFailFast(true);
-        Environment body = new Environment("foo", "development");
         this.restTemplate = new RestTemplate();
         DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
         uriTemplateHandler.setBaseUrl("http://localhost:8888");
@@ -171,7 +169,7 @@ public class Main {
         resource.setName(PREFIX_JDBC + serviceName);
         resource.setAuth("Container");
         resource.setType("javax.sql.DataSource");
-        resource.setProperty("driverClassName","com.mysql.cj.jdbc.Driver");
+        resource.setProperty("driverClassName", "com.mysql.cj.jdbc.Driver");
         resource.setProperty("url", credentials.get("jdbcUrl"));
         resource.setProperty("factory", "org.apache.tomcat.jdbc.pool.DataSourceFactory");
         resource.setProperty("username", credentials.get(("username")));
