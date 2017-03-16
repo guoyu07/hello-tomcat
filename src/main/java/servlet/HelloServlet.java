@@ -28,8 +28,9 @@ public class HelloServlet extends HttpServlet {
             InitialContext initialContext = new InitialContext();
             Context envContext = (Context) initialContext.lookup("java:/comp/env");
             DataSource ds = (DataSource) envContext.lookup(PREFIX_JDBC + "hello-db");
-            System.out.println(ds);
+            System.out.println("DataSource found: '" + ds + "'");
         }catch (Exception e){
+            System.out.println("DataSource NOT found");
             e.printStackTrace();
         }
         ServletOutputStream out = resp.getOutputStream();

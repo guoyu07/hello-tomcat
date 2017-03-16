@@ -91,8 +91,8 @@ public class Main {
         if (webPort == null || webPort.isEmpty()) {
             webPort = "8080";
         }
-
         tomcat.setPort(Integer.valueOf(webPort));
+
         File webContentFolder = new File(root.getAbsolutePath(), "src/main/resources/");
         if (!webContentFolder.exists()) {
             //webContentFolder = Files.createTempDirectory("default-doc-base").toFile();
@@ -115,7 +115,7 @@ public class Main {
 
         // Declare an alternative location for your "WEB-INF/classes" dir
         // Servlet 3.0 annotation will work
-        File additionWebInfClassesFolder = new File(root.getAbsolutePath(), "build/classes");
+        File additionWebInfClassesFolder = new File(root.getAbsolutePath(), "build/classes/main");
         WebResourceRoot resources = new StandardRoot(ctx);
 
         WebResourceSet resourceSet;
@@ -143,10 +143,6 @@ public class Main {
     }
 
     private static ContextResource getResource(PropertySource source, String serviceName) {
-        Object jdbcUrl = source.getProperty("jdbcUrl");
-
-        logger.info("jdbcUrl is set to: " + jdbcUrl);
-
         Map<String, Object> credentials = new HashMap<>();
         Cloud cloud = getCloudInstance();
         if (cloud != null) {
@@ -157,9 +153,19 @@ public class Main {
             credentials.put("password", service.getPassword());
         } else {
             System.out.println("We're running locally!");
-            credentials.put("jdbcUrl", source.getProperty("jdbcUrl"));
-            credentials.put("username", source.getProperty("username"));
-            credentials.put("password", source.getProperty("password"));
+            if (source != null) {
+                System.out.println("We're running config server!");
+                Object jdbcUrl = source.getProperty("jdbcUrl");
+                logger.info("jdbcUrl is set to: " + jdbcUrl);
+                credentials.put("jdbcUrl", source.getProperty("jdbcUrl"));
+                credentials.put("username", source.getProperty("username"));
+                credentials.put("password", source.getProperty("password"));
+            } else {
+                System.out.println("We're running without config server!");
+                credentials.put("jdbcUrl", "jdbc:mysql://localhost/mysql?useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+                credentials.put("username", "root");
+                credentials.put("password", "password");
+            }
         }
 
         System.out.println(credentials);
