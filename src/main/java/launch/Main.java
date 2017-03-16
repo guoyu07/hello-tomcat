@@ -14,7 +14,15 @@ import org.apache.tomcat.util.scan.StandardJarScanFilter;
 import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudException;
 import org.springframework.cloud.CloudFactory;
+import org.springframework.cloud.config.client.ConfigClientProperties;
+import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
+import org.springframework.cloud.config.environment.Environment;
 import org.springframework.cloud.service.common.MysqlServiceInfo;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.env.PropertySource;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriTemplateHandler;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -33,7 +41,25 @@ public class Main {
 
     private static volatile Cloud cloud;
 
-    private static File getRootFolder() {
+    private ConfigurableEnvironment environment = new StandardEnvironment();
+
+    private ConfigServicePropertySourceLocator locator;
+
+    private RestTemplate restTemplate;
+
+    private Main() {
+        ConfigClientProperties defaults = new ConfigClientProperties(this.environment);
+        defaults.setFailFast(true);
+        Environment body = new Environment("foo", "development");
+        this.restTemplate = new RestTemplate();
+        DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
+        uriTemplateHandler.setBaseUrl("http://localhost:8888");
+        this.restTemplate.setUriTemplateHandler(uriTemplateHandler);
+        this.locator = new ConfigServicePropertySourceLocator(defaults);
+        this.locator.setRestTemplate(restTemplate);
+    }
+
+    private File getRootFolder() {
         try {
             File root;
             String runningJarPath = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath().replaceAll("\\\\", "/");
@@ -52,7 +78,14 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        File root = getRootFolder();
+        Main main = new Main();
+        PropertySource source = main.locator.locate(main.environment);
+
+        Object bar = source.getProperty("foo");
+
+        logger.info("Foo is set to: " + bar);
+
+        File root = main.getRootFolder();
         System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
         Tomcat tomcat = new Tomcat();
         Path tempPath = Files.createTempDirectory("tomcat-base-dir");
