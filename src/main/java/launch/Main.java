@@ -34,17 +34,21 @@ import java.util.logging.Logger;
 public class Main {
     public static final String PREFIX_JDBC = "jdbc/";
 
+    public static final String HTTPS_SCHEME = "https://";
+
+    public static final String HTTP_SCHEME = "http://";
+
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     private static final Object monitor = new Object();
 
     private static volatile Cloud cloud;
 
-    private ConfigurableEnvironment environment;
+    private final ConfigurableEnvironment environment = new StandardEnvironment();
 
     private ConfigServicePropertySourceLocator locator;
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     private File getRootFolder() {
         try {
@@ -122,9 +126,9 @@ public class Main {
         }
         resources.addPreResources(resourceSet);
         ctx.setResources(resources);
-
-        ctx.getNamingResources().addEnvironment(getEnvironment());
         PropertySource source = main.locator.locate(main.environment);
+
+        ctx.getNamingResources().addEnvironment(getEnvironment(source));
         ctx.getNamingResources().addResource(getResource(source, "hello-db"));
 
         tomcat.enableNaming();
@@ -133,20 +137,11 @@ public class Main {
     }
 
     private void loadConfiguration(String configServerUrl) {
-        Cloud cloud = getCloudInstance();
-        if ((configServerUrl == null || configServerUrl.isEmpty()) && cloud != null) {
-            configServerUrl = cloud.getCloudProperties().getProperty("user-provided.config-service.credentials.uri");
-//            this.environment = new StandardServletEnvironment();
-            this.environment = new StandardEnvironment();
-        } else {
-            this.environment = new StandardEnvironment();
-        }
-        System.out.println("configServerUrl is '" + configServerUrl + "'");
         if (configServerUrl == null || configServerUrl.isEmpty()) {
-            throw new RuntimeException("You need to set configServerUrl");
+            throw new RuntimeException("You MUST set the config server URI");
         }
-        if (!configServerUrl.startsWith("https://")) {
-            configServerUrl = "https://" + configServerUrl;
+        if (!configServerUrl.startsWith(HTTP_SCHEME) && !configServerUrl.startsWith(HTTP_SCHEME)) {
+            throw new RuntimeException("You MUST put the URI scheme in front of the config server URI");
         }
         System.out.println("configServerUrl is '" + configServerUrl + "'");
         ConfigClientProperties defaults = new ConfigClientProperties(this.environment);
@@ -154,7 +149,6 @@ public class Main {
         defaults.setUri(configServerUrl);
         DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
         uriTemplateHandler.setBaseUrl(configServerUrl);
-        this.restTemplate = new RestTemplate();
         this.restTemplate.setUriTemplateHandler(uriTemplateHandler);
         this.locator = new ConfigServicePropertySourceLocator(defaults);
         this.locator.setRestTemplate(restTemplate);
@@ -163,6 +157,11 @@ public class Main {
     private static ContextResource getResource(PropertySource source, String serviceName) {
         Map<String, Object> credentials = new HashMap<>();
         Cloud cloud = getCloudInstance();
+        if (source != null) {
+            System.out.println("We're running config server!");
+            Object foo = source.getProperty("foo");
+            logger.info("foo is set to: " + foo);
+        }
         if (cloud != null) {
             System.out.println("We're in the cloud!");
             MysqlServiceInfo service = (MysqlServiceInfo) cloud.getServiceInfo(serviceName);
@@ -172,7 +171,6 @@ public class Main {
         } else {
             System.out.println("We're running locally!");
             if (source != null) {
-                System.out.println("We're running config server!");
                 Object jdbcUrl = source.getProperty("jdbcUrl");
                 logger.info("jdbcUrl is set to: " + jdbcUrl);
                 credentials.put("jdbcUrl", source.getProperty("jdbcUrl"));
@@ -201,10 +199,10 @@ public class Main {
         return resource;
     }
 
-    private static ContextEnvironment getEnvironment() {
+    private static ContextEnvironment getEnvironment(PropertySource source) {
         ContextEnvironment env = new ContextEnvironment();
-        env.setName("lastname");
-        env.setValue("Alston");
+        env.setName("foo");
+        env.setValue(source.getProperty("foo").toString());
         env.setType("java.lang.String");
         env.setOverride(false);
         return env;
