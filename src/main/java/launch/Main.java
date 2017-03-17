@@ -140,7 +140,7 @@ public class Main {
         if (configServerUrl == null || configServerUrl.isEmpty()) {
             throw new RuntimeException("You MUST set the config server URI");
         }
-        if (!configServerUrl.startsWith(HTTP_SCHEME) && !configServerUrl.startsWith(HTTP_SCHEME)) {
+        if (!configServerUrl.startsWith(HTTP_SCHEME) && !configServerUrl.startsWith(HTTPS_SCHEME)) {
             throw new RuntimeException("You MUST put the URI scheme in front of the config server URI");
         }
         System.out.println("configServerUrl is '" + configServerUrl + "'");
