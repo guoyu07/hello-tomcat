@@ -14,10 +14,12 @@ Start ConfigServer
 
 ```bash
 $ ./gradlew clean shadowJar
-$ java -jar build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar
+$ java -jar build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar "http://localhost:8888"
 ```
 
 ### Run on PCF
+
+Push config-server and change the `JBP_CONFIG_JAVA_MAIN` variable inside the `manifest.yml` to point to the config-server url.
 
 ```bash
 $ ./gradlew clean shadowJar

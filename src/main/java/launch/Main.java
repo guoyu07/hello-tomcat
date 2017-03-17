@@ -46,12 +46,12 @@ public class Main {
 
     private RestTemplate restTemplate;
 
-    private Main() {
+    private Main(String configServerUrl) {
         ConfigClientProperties defaults = new ConfigClientProperties(this.environment);
         defaults.setFailFast(true);
-        this.restTemplate = new RestTemplate();
         DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
-        uriTemplateHandler.setBaseUrl("http://localhost:8888");
+        uriTemplateHandler.setBaseUrl(configServerUrl);
+        this.restTemplate = new RestTemplate();
         this.restTemplate.setUriTemplateHandler(uriTemplateHandler);
         this.locator = new ConfigServicePropertySourceLocator(defaults);
         this.locator.setRestTemplate(restTemplate);
@@ -76,7 +76,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        Main main = new Main();
+        Main main = new Main(args[0]);
         PropertySource source = main.locator.locate(main.environment);
 
         File root = main.getRootFolder();
