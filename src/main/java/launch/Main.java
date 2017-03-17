@@ -40,22 +40,11 @@ public class Main {
 
     private static volatile Cloud cloud;
 
-    private ConfigurableEnvironment environment = new StandardEnvironment();
+    private ConfigurableEnvironment environment;
 
     private ConfigServicePropertySourceLocator locator;
 
     private RestTemplate restTemplate;
-
-    private Main(String configServerUrl) {
-        ConfigClientProperties defaults = new ConfigClientProperties(this.environment);
-        defaults.setFailFast(true);
-        DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
-        uriTemplateHandler.setBaseUrl(configServerUrl);
-        this.restTemplate = new RestTemplate();
-        this.restTemplate.setUriTemplateHandler(uriTemplateHandler);
-        this.locator = new ConfigServicePropertySourceLocator(defaults);
-        this.locator.setRestTemplate(restTemplate);
-    }
 
     private File getRootFolder() {
         try {
@@ -76,8 +65,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        Main main = new Main(args[0]);
-        PropertySource source = main.locator.locate(main.environment);
+        Main main = new Main();
+        main.loadConfiguration(args[0]);
 
         File root = main.getRootFolder();
         System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
@@ -135,11 +124,40 @@ public class Main {
         ctx.setResources(resources);
 
         ctx.getNamingResources().addEnvironment(getEnvironment());
+        PropertySource source = main.locator.locate(main.environment);
         ctx.getNamingResources().addResource(getResource(source, "hello-db"));
 
         tomcat.enableNaming();
         tomcat.start();
         tomcat.getServer().await();
+    }
+
+    private void loadConfiguration(String configServerUrl) {
+        Cloud cloud = getCloudInstance();
+        if ((configServerUrl == null || configServerUrl.isEmpty()) && cloud != null) {
+            configServerUrl = cloud.getCloudProperties().getProperty("user-provided.config-service.credentials.uri");
+//            this.environment = new StandardServletEnvironment();
+            this.environment = new StandardEnvironment();
+        } else {
+            this.environment = new StandardEnvironment();
+        }
+        System.out.println("configServerUrl is '" + configServerUrl + "'");
+        if (configServerUrl == null || configServerUrl.isEmpty()) {
+            throw new RuntimeException("You need to set configServerUrl");
+        }
+        if (!configServerUrl.startsWith("https://")) {
+            configServerUrl = "https://" + configServerUrl;
+        }
+        System.out.println("configServerUrl is '" + configServerUrl + "'");
+        ConfigClientProperties defaults = new ConfigClientProperties(this.environment);
+        defaults.setFailFast(true);
+        defaults.setUri(configServerUrl);
+        DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
+        uriTemplateHandler.setBaseUrl(configServerUrl);
+        this.restTemplate = new RestTemplate();
+        this.restTemplate.setUriTemplateHandler(uriTemplateHandler);
+        this.locator = new ConfigServicePropertySourceLocator(defaults);
+        this.locator.setRestTemplate(restTemplate);
     }
 
     private static ContextResource getResource(PropertySource source, String serviceName) {
