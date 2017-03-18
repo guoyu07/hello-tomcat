@@ -1,5 +1,6 @@
-package launch;
+package io.pivotal.launch;
 
+import io.pivotal.hellotomcat.config.ConfigFileEnvironmentProcessor;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.WebResourceSet;
 import org.apache.catalina.core.StandardContext;
@@ -29,7 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+
+import static io.pivotal.hellotomcat.config.ConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME;
 
 public class Main {
     public static final String PREFIX_JDBC = "jdbc/";
@@ -38,39 +40,22 @@ public class Main {
 
     public static final String HTTP_SCHEME = "http://";
 
-    private static final Logger logger = Logger.getLogger(Main.class.getName());
-
     private static final Object monitor = new Object();
 
     private static volatile Cloud cloud;
 
-    private final ConfigurableEnvironment environment = new StandardEnvironment();
+    private ConfigurableEnvironment environment = new StandardEnvironment();
 
     private ConfigServicePropertySourceLocator locator;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private File getRootFolder() {
-        try {
-            File root;
-            String runningJarPath = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath().replaceAll("\\\\", "/");
-            int lastIndexOf = runningJarPath.lastIndexOf("/build/libs/");
-            if (lastIndexOf < 0) {
-                root = new File("");
-            } else {
-                root = new File(runningJarPath.substring(0, lastIndexOf));
-            }
-            System.out.println("application resolved root folder: " + root.getAbsolutePath());
-            return root;
-        } catch (URISyntaxException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
+    private ConfigFileEnvironmentProcessor configFileEnvironmentProcessor = new ConfigFileEnvironmentProcessor();
 
     public static void main(String[] args) throws Exception {
 
         Main main = new Main();
-        main.loadConfiguration(args[0]);
+        PropertySource source = main.loadConfiguration(args[0]);
 
         File root = main.getRootFolder();
         System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
@@ -126,7 +111,6 @@ public class Main {
         }
         resources.addPreResources(resourceSet);
         ctx.setResources(resources);
-        PropertySource source = main.locator.locate(main.environment);
 
         ctx.getNamingResources().addEnvironment(getEnvironment(source));
         ctx.getNamingResources().addResource(getResource(source, "hello-db"));
@@ -136,7 +120,7 @@ public class Main {
         tomcat.getServer().await();
     }
 
-    private void loadConfiguration(String configServerUrl) {
+    private PropertySource loadConfiguration(String configServerUrl) {
         if (configServerUrl == null || configServerUrl.isEmpty()) {
             throw new RuntimeException("You MUST set the config server URI");
         }
@@ -145,46 +129,57 @@ public class Main {
         }
         System.out.println("configServerUrl is '" + configServerUrl + "'");
         ConfigClientProperties defaults = new ConfigClientProperties(this.environment);
-        defaults.setFailFast(true);
+        defaults.setFailFast(false);
         defaults.setUri(configServerUrl);
         DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
         uriTemplateHandler.setBaseUrl(configServerUrl);
         this.restTemplate.setUriTemplateHandler(uriTemplateHandler);
         this.locator = new ConfigServicePropertySourceLocator(defaults);
         this.locator.setRestTemplate(restTemplate);
+
+        PropertySource source = this.locator.locate(this.environment);
+        if (source != null) {
+            this.environment.getPropertySources().addFirst(source);
+        }
+        StandardEnvironment localEnvironment = new StandardEnvironment();
+        this.configFileEnvironmentProcessor.processEnvironment(localEnvironment);
+        this.environment.merge(localEnvironment);
+        if (source == null) {
+            source = this.environment.getPropertySources().get(APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME);
+        }
+
+        return source;
+    }
+
+    private File getRootFolder() {
+        try {
+            File root;
+            String runningJarPath = Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath().replaceAll("\\\\", "/");
+            int lastIndexOf = runningJarPath.lastIndexOf("/build/libs/");
+            if (lastIndexOf < 0) {
+                root = new File("");
+            } else {
+                root = new File(runningJarPath.substring(0, lastIndexOf));
+            }
+            System.out.println("application resolved root folder: " + root.getAbsolutePath());
+            return root;
+        } catch (URISyntaxException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     private static ContextResource getResource(PropertySource source, String serviceName) {
         Map<String, Object> credentials = new HashMap<>();
         Cloud cloud = getCloudInstance();
-        if (source != null) {
-            System.out.println("We're running config server!");
-            Object foo = source.getProperty("foo");
-            logger.info("foo is set to: " + foo);
-        }
         if (cloud != null) {
             System.out.println("We're in the cloud!");
             MysqlServiceInfo service = (MysqlServiceInfo) cloud.getServiceInfo(serviceName);
             credentials.put("jdbcUrl", service.getJdbcUrl());
             credentials.put("username", service.getUserName());
             credentials.put("password", service.getPassword());
-        } else {
-            System.out.println("We're running locally!");
-            if (source != null) {
-                Object jdbcUrl = source.getProperty("jdbcUrl");
-                logger.info("jdbcUrl is set to: " + jdbcUrl);
-                credentials.put("jdbcUrl", source.getProperty("jdbcUrl"));
-                credentials.put("username", source.getProperty("username"));
-                credentials.put("password", source.getProperty("password"));
-            } else {
-                System.out.println("We're running without config server!");
-                credentials.put("jdbcUrl", "jdbc:mysql://localhost/mysql?useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
-                credentials.put("username", "root");
-                credentials.put("password", "password");
-            }
         }
 
-        System.out.println(credentials);
+        System.out.println("creds: " + credentials);
 
         ContextResource resource = new ContextResource();
         resource.setName(PREFIX_JDBC + serviceName);

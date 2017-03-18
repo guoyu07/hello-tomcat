@@ -1,4 +1,4 @@
-package servlet;
+package io.pivotal.hellotomcat.servlet;
 
 import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudException;

@@ -1,4 +1,4 @@
-package servlet;
+package io.pivotal.hellotomcat.servlet;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
 
-import static launch.Main.PREFIX_JDBC;
+import static io.pivotal.launch.Main.PREFIX_JDBC;
 
 @WebServlet(
         name = "MyServlet",
