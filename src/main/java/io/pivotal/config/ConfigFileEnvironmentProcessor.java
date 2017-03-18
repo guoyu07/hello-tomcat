@@ -1,4 +1,4 @@
-package io.pivotal.hellotomcat.config;
+package io.pivotal.config;
 
 import org.apache.commons.logging.Log;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;

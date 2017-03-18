@@ -1,6 +1,6 @@
 package io.pivotal.launch;
 
-import io.pivotal.hellotomcat.config.ConfigFileEnvironmentProcessor;
+import io.pivotal.config.ConfigFileEnvironmentProcessor;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.WebResourceSet;
 import org.apache.catalina.core.StandardContext;
@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.pivotal.hellotomcat.config.ConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME;
+import static io.pivotal.config.ConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME;
 
 public class Main {
     public static final String PREFIX_JDBC = "jdbc/";
@@ -44,13 +44,13 @@ public class Main {
 
     private static volatile Cloud cloud;
 
-    private ConfigurableEnvironment environment = new StandardEnvironment();
+    private final ConfigurableEnvironment environment = new StandardEnvironment();
 
     private ConfigServicePropertySourceLocator locator;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private ConfigFileEnvironmentProcessor configFileEnvironmentProcessor = new ConfigFileEnvironmentProcessor();
+    private final ConfigFileEnvironmentProcessor configFileEnvironmentProcessor = new ConfigFileEnvironmentProcessor();
 
     public static void main(String[] args) throws Exception {
 
