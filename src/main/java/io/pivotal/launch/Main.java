@@ -1,6 +1,6 @@
 package io.pivotal.launch;
 
-import io.pivotal.config.ConfigFileEnvironmentProcessor;
+import io.pivotal.config.LocalConfigFileEnvironmentProcessor;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.WebResourceSet;
 import org.apache.catalina.core.StandardContext;
@@ -18,7 +18,9 @@ import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.config.client.ConfigClientProperties;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.service.common.MysqlServiceInfo;
-import org.springframework.core.env.*;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 
@@ -27,10 +29,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static io.pivotal.config.ConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME;
+import static io.pivotal.config.LocalConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME;
 
 public class Main {
     public static final String PREFIX_JDBC = "jdbc/";
@@ -49,7 +50,7 @@ public class Main {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private final ConfigFileEnvironmentProcessor configFileEnvironmentProcessor = new ConfigFileEnvironmentProcessor();
+    private final LocalConfigFileEnvironmentProcessor localLocalConfigFileEnvironmentProcessor = new LocalConfigFileEnvironmentProcessor();
 
     public static void main(String[] args) throws Exception {
 
@@ -123,41 +124,6 @@ public class Main {
         tomcat.getServer().await();
     }
 
-    private void addPropertySource(ConfigurableEnvironment result, CompositePropertySource composite) {
-        if (result != null) {
-//                logger.info(String.format("Located environment: name=%s, profiles=%s, label=%s, version=%s, state=%s",
-//                        result.getName(),
-//                        result.getProfiles() == null ? "" : Arrays.asList(result.getProfiles()),
-//                        result.getLabel(), result.getVersion(), result.getState()));
-
-            if (result.getPropertySources() != null) { // result.getPropertySources() can be null if using xml
-                for (PropertySource source : result.getPropertySources()) {
-                    if (source.getSource() instanceof Map) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> map = (Map<String, Object>) source
-                                .getSource();
-                        composite.addPropertySource(new MapPropertySource(source
-                                .getName(), map));
-                    } else if (source.getSource() instanceof List) {
-                        List sourceList = (List) source.getSource();
-                        for (Object src : sourceList) {
-                            EnumerablePropertySource eps = (EnumerablePropertySource) src;
-                            composite.addPropertySource(eps);
-//                                for (String name: eps.getPropertyNames()) {
-//                                    LinkedHashSet set = (LinkedHashSet) eps.getSource();
-//                                    for (Object s : set) {
-//                                        PropertiesPropertySource pps = (PropertiesPropertySource) s;
-//                                        composite.addPropertySource(pps);
-//                                    }
-//                                }
-                        }
-                    }
-                    source.getSource();
-                }
-            }
-        }
-    }
-
     private PropertySource loadConfiguration(String configServerUrl) {
         if (configServerUrl == null || configServerUrl.isEmpty()) {
             throw new RuntimeException("You MUST set the config server URI");
@@ -175,16 +141,7 @@ public class Main {
         this.locator = new ConfigServicePropertySourceLocator(defaults);
         this.locator.setRestTemplate(restTemplate);
         PropertySource source = this.locator.locate(this.environment);
-        if (source != null) {
-            this.environment.getPropertySources().addFirst(source);
-        }
-
-//        StandardEnvironment localEnvironment = new StandardEnvironment();
-        this.configFileEnvironmentProcessor.processEnvironment(environment);
-//        this.environment.merge(localEnvironment);
-        if (source != null) {
-            this.addPropertySource(this.environment, (CompositePropertySource) source);
-        }
+        this.localLocalConfigFileEnvironmentProcessor.processEnvironment(environment, source);
 
         return source == null ? this.environment.getPropertySources().get(APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME) : source;
     }

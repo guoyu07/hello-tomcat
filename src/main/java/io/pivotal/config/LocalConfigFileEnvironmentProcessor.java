@@ -18,7 +18,12 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.util.*;
 
-public class ConfigFileEnvironmentProcessor {
+/**
+ * TODO: Make this subclass org.springframework.boot.context.config.ConfigFileApplicationListener
+ *
+ * @see org.springframework.boot.context.config.ConfigFileApplicationListener
+ */
+public class LocalConfigFileEnvironmentProcessor {
     private static final String DEFAULT_PROPERTIES = "defaultProperties";
 
     // Note the order is from least to most specific (last one wins)
@@ -60,12 +65,18 @@ public class ConfigFileEnvironmentProcessor {
     private String names;
 
 
-    public ConfigFileEnvironmentProcessor() {
+    public LocalConfigFileEnvironmentProcessor() {
         this.resourceLoader = new DefaultResourceLoader(this.getClassLoader());
     }
 
-    public void processEnvironment(ConfigurableEnvironment environment) {
+    public void processEnvironment(ConfigurableEnvironment environment, PropertySource source) {
+        if (source != null) {
+            environment.getPropertySources().addFirst(source);
+        }
         addPropertySources(environment, this.getResourceLoader());
+        if (source != null) {
+            this.addPropertySource(environment, (CompositePropertySource) source);
+        }
     }
 
     protected void addPropertySources(ConfigurableEnvironment environment, ResourceLoader resourceLoader) {
@@ -74,6 +85,30 @@ public class ConfigFileEnvironmentProcessor {
             new Loader(environment, resourceLoader).load();
         } catch (IOException ex) {
             throw new IllegalStateException("Unable to load configuration files", ex);
+        }
+    }
+
+    private void addPropertySource(ConfigurableEnvironment environment, CompositePropertySource composite) {
+        if (environment != null) {
+            if (environment.getPropertySources() != null) {
+                for (PropertySource source : environment.getPropertySources()) {
+                    if (source.getSource() instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> map = (Map<String, Object>) source
+                                .getSource();
+                        composite.addPropertySource(new MapPropertySource(source
+                                .getName(), map));
+                    } else if (source.getSource() instanceof List) {
+                        List sourceList = (List) source.getSource();
+                        for (Object src : sourceList) {
+                            if (src instanceof  EnumerablePropertySource) {
+                                EnumerablePropertySource eps = (EnumerablePropertySource) src;
+                                composite.addPropertySource(eps);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -190,7 +225,7 @@ public class ConfigFileEnvironmentProcessor {
      */
     private class Loader {
 
-        private final Log logger = ConfigFileEnvironmentProcessor.this.logger;
+        private final Log logger = LocalConfigFileEnvironmentProcessor.this.logger;
 
         private final ConfigurableEnvironment environment;
 
@@ -465,7 +500,7 @@ public class ConfigFileEnvironmentProcessor {
                 }
             }
             locations.addAll(
-                    asResolvedSet(ConfigFileEnvironmentProcessor.this.searchLocations,
+                    asResolvedSet(LocalConfigFileEnvironmentProcessor.this.searchLocations,
                             DEFAULT_SEARCH_LOCATIONS));
             return locations;
         }
@@ -475,7 +510,7 @@ public class ConfigFileEnvironmentProcessor {
                 return asResolvedSet(this.environment.getProperty(CONFIG_NAME_PROPERTY),
                         null);
             }
-            return asResolvedSet(ConfigFileEnvironmentProcessor.this.names, DEFAULT_NAMES);
+            return asResolvedSet(LocalConfigFileEnvironmentProcessor.this.names, DEFAULT_NAMES);
         }
 
         private Set<String> asResolvedSet(String value, String fallback) {

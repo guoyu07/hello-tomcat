@@ -1,8 +1,6 @@
 package io.pivotal.config;
 
-import org.springframework.boot.env.EnumerableCompositePropertySource;
 import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ public class ConfigurationPropertySources
     private final String[] names;
 
     ConfigurationPropertySources(Collection<PropertySource<?>> sources) {
-        super(ConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME, sources);
+        super(LocalConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME, sources);
         this.sources = sources;
         List<String> names = new ArrayList<>();
         for (PropertySource<?> source : sources) {
@@ -43,26 +41,6 @@ public class ConfigurationPropertySources
             }
         }
         return null;
-    }
-
-    public void finishAndRelocate(MutablePropertySources propertySources) {
-        String name = ConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME;
-        ConfigurationPropertySources removed = (ConfigurationPropertySources) propertySources
-                .get(name);
-        if (removed != null) {
-            for (PropertySource<?> propertySource : removed.sources) {
-                if (propertySource instanceof EnumerableCompositePropertySource) {
-                    EnumerableCompositePropertySource composite = (EnumerableCompositePropertySource) propertySource;
-                    for (PropertySource<?> nested : composite.getSource()) {
-                        propertySources.addAfter(name, nested);
-                        name = nested.getName();
-                    }
-                } else {
-                    propertySources.addAfter(name, propertySource);
-                }
-            }
-            propertySources.remove(ConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME);
-        }
     }
 
     @Override
