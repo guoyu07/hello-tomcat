@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.context.config.RandomValuePropertySource;
-import org.springframework.boot.env.EnumerableCompositePropertySource;
 import org.springframework.boot.env.PropertySourcesLoader;
 import org.springframework.boot.logging.DeferredLog;
 import org.springframework.core.env.*;
@@ -94,67 +93,6 @@ public class ConfigFileEnvironmentProcessor {
     public void setSearchNames(String names) {
         Assert.hasLength(names, "Names must not be empty");
         this.names = names;
-    }
-
-    /**
-     * Holds the configuration {@link PropertySource}s as they are loaded can relocate
-     * them once configuration classes have been processed.
-     */
-    static class ConfigurationPropertySources
-            extends EnumerablePropertySource<Collection<PropertySource<?>>> {
-
-        private final Collection<PropertySource<?>> sources;
-
-        private final String[] names;
-
-        ConfigurationPropertySources(Collection<PropertySource<?>> sources) {
-            super(APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME, sources);
-            this.sources = sources;
-            List<String> names = new ArrayList<>();
-            for (PropertySource<?> source : sources) {
-                if (source instanceof EnumerablePropertySource) {
-                    names.addAll(Arrays.asList(
-                            ((EnumerablePropertySource<?>) source).getPropertyNames()));
-                }
-            }
-            this.names = names.toArray(new String[names.size()]);
-        }
-
-        @Override
-        public Object getProperty(String name) {
-            for (PropertySource<?> propertySource : this.sources) {
-                Object value = propertySource.getProperty(name);
-                if (value != null) {
-                    return value;
-                }
-            }
-            return null;
-        }
-
-        public static void finishAndRelocate(MutablePropertySources propertySources) {
-            String name = APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME;
-            ConfigurationPropertySources removed = (ConfigurationPropertySources) propertySources
-                    .get(name);
-            if (removed != null) {
-                for (PropertySource<?> propertySource : removed.sources) {
-                    if (propertySource instanceof EnumerableCompositePropertySource) {
-                        EnumerableCompositePropertySource composite = (EnumerableCompositePropertySource) propertySource;
-                        for (PropertySource<?> nested : composite.getSource()) {
-                            propertySources.addAfter(name, nested);
-                            name = nested.getName();
-                        }
-                    } else {
-                        propertySources.addAfter(name, propertySource);
-                    }
-                }
-                propertySources.remove(APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME);
-            }
-        }
-
-        @Override
-        public String[] getPropertyNames() {
-            return this.names;
-        }
     }
 
     private static class Profile {

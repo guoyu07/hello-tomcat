@@ -18,9 +18,7 @@ import org.springframework.cloud.CloudFactory;
 import org.springframework.cloud.config.client.ConfigClientProperties;
 import org.springframework.cloud.config.client.ConfigServicePropertySourceLocator;
 import org.springframework.cloud.service.common.MysqlServiceInfo;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertySource;
-import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.env.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 
@@ -29,6 +27,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.pivotal.config.ConfigFileEnvironmentProcessor.APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME;
@@ -112,12 +111,51 @@ public class Main {
         resources.addPreResources(resourceSet);
         ctx.setResources(resources);
 
-        ctx.getNamingResources().addEnvironment(getEnvironment(source));
+        ctx.getNamingResources().addEnvironment(getEnvironment(source, "foo"));
+        if (isConfigServerLocal(source)) {
+            ctx.getNamingResources().addEnvironment(getEnvironment(source, "secret"));
+            ctx.getNamingResources().addEnvironment(getEnvironment(source, "custom-secret"));
+        }
         ctx.getNamingResources().addResource(getResource(source, "hello-db"));
 
         tomcat.enableNaming();
         tomcat.start();
         tomcat.getServer().await();
+    }
+
+    private void addPropertySource(ConfigurableEnvironment result, CompositePropertySource composite) {
+        if (result != null) {
+//                logger.info(String.format("Located environment: name=%s, profiles=%s, label=%s, version=%s, state=%s",
+//                        result.getName(),
+//                        result.getProfiles() == null ? "" : Arrays.asList(result.getProfiles()),
+//                        result.getLabel(), result.getVersion(), result.getState()));
+
+            if (result.getPropertySources() != null) { // result.getPropertySources() can be null if using xml
+                for (PropertySource source : result.getPropertySources()) {
+                    if (source.getSource() instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> map = (Map<String, Object>) source
+                                .getSource();
+                        composite.addPropertySource(new MapPropertySource(source
+                                .getName(), map));
+                    } else if (source.getSource() instanceof List) {
+                        List sourceList = (List) source.getSource();
+                        for (Object src : sourceList) {
+                            EnumerablePropertySource eps = (EnumerablePropertySource) src;
+                            composite.addPropertySource(eps);
+//                                for (String name: eps.getPropertyNames()) {
+//                                    LinkedHashSet set = (LinkedHashSet) eps.getSource();
+//                                    for (Object s : set) {
+//                                        PropertiesPropertySource pps = (PropertiesPropertySource) s;
+//                                        composite.addPropertySource(pps);
+//                                    }
+//                                }
+                        }
+                    }
+                    source.getSource();
+                }
+            }
+        }
     }
 
     private PropertySource loadConfiguration(String configServerUrl) {
@@ -136,19 +174,19 @@ public class Main {
         this.restTemplate.setUriTemplateHandler(uriTemplateHandler);
         this.locator = new ConfigServicePropertySourceLocator(defaults);
         this.locator.setRestTemplate(restTemplate);
-
         PropertySource source = this.locator.locate(this.environment);
         if (source != null) {
             this.environment.getPropertySources().addFirst(source);
         }
-        StandardEnvironment localEnvironment = new StandardEnvironment();
-        this.configFileEnvironmentProcessor.processEnvironment(localEnvironment);
-        this.environment.merge(localEnvironment);
-        if (source == null) {
-            source = this.environment.getPropertySources().get(APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME);
+
+//        StandardEnvironment localEnvironment = new StandardEnvironment();
+        this.configFileEnvironmentProcessor.processEnvironment(environment);
+//        this.environment.merge(localEnvironment);
+        if (source != null) {
+            this.addPropertySource(this.environment, (CompositePropertySource) source);
         }
 
-        return source;
+        return source == null ? this.environment.getPropertySources().get(APPLICATION_CONFIGURATION_PROPERTY_SOURCE_NAME) : source;
     }
 
     private File getRootFolder() {
@@ -194,13 +232,18 @@ public class Main {
         return resource;
     }
 
-    private static ContextEnvironment getEnvironment(PropertySource source) {
+    private static ContextEnvironment getEnvironment(PropertySource source, String name) {
+        System.out.println("Setting key: '" + name + "'" + " to value: '" + source.getProperty(name).toString() + "'");
         ContextEnvironment env = new ContextEnvironment();
-        env.setName("foo");
-        env.setValue(source.getProperty("foo").toString());
+        env.setName(name);
+        env.setValue(source.getProperty(name).toString());
         env.setType("java.lang.String");
         env.setOverride(false);
         return env;
+    }
+
+    private static boolean isConfigServerLocal(PropertySource source) {
+        return source.getProperty("configlocal") != null;
     }
 
     private static Cloud getCloudInstance() {
