@@ -21,7 +21,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 jar {
     manifest {
-        attributes("Main-Class": "io.pivotal.launch.Main")
+        attributes("Main-Class": "io.pivotal.hellotomcat.launch.Main")
     }
 }
 

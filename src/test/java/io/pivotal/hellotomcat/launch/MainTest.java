@@ -1,4 +1,4 @@
-package io.pivotal.launch;
+package io.pivotal.hellotomcat.launch;
 
 import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.startup.Tomcat;

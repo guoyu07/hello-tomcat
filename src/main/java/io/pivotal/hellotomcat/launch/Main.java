@@ -1,6 +1,7 @@
-package io.pivotal.launch;
+package io.pivotal.hellotomcat.launch;
 
-import io.pivotal.cloud.CloudInstanceHolder;
+import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
+import io.pivotal.launch.TomcatConfigurer;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.springframework.cloud.Cloud;
