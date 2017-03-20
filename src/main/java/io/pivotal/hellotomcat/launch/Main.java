@@ -61,7 +61,7 @@ public class Main {
     }
 
     private boolean isConfigServerLocal(PropertySource source) {
-        return source.getProperty("configlocal") != null &&
-                Boolean.valueOf(source.getProperty("configlocal").toString());
+        return source.getProperty("CONFIG_LOCAL") != null &&
+                Boolean.valueOf(source.getProperty("CONFIG_LOCAL").toString());
     }
 }
