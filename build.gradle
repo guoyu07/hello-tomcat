@@ -57,6 +57,8 @@ dependencies {
 
     runtime('mysql:mysql-connector-java:6.0.5')
     runtime("org.apache.tomcat:tomcat-dbcp:${tomcatVersion}")
+
+    testCompile("junit:junit:4.12")
 }
 
 build.dependsOn('shadowJar')

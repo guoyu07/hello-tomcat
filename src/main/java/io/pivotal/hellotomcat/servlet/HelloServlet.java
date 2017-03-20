@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
 
-import static io.pivotal.launch.Main.PREFIX_JDBC;
+import static io.pivotal.launch.TomcatConfigurer.PREFIX_JDBC;
 
 @WebServlet(
         name = "MyServlet",
