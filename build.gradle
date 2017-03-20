@@ -25,7 +25,7 @@ jar {
     }
 }
 
-group = 'com.example'
+group = 'io.pivotal'
 version = buildNrLoc
 
 sourceCompatibility = '1.8'
