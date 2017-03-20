@@ -8,4 +8,4 @@ services:
   - hello-db
 env:
   SPRING_PROFILES_ACTIVE: cloud
-  JBP_CONFIG_JAVA_MAIN: '{ arguments: "https://configserver-nonrioting-inpatient.cfapps.pez.pivotal.io" }'
+  JBP_CONFIG_JAVA_MAIN: '{ arguments: "https://configserver.cfapps.pez.pivotal.io" }'
