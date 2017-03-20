@@ -3,14 +3,12 @@ package io.pivotal.launch;
 import org.apache.catalina.core.StandardServer;
 import org.apache.catalina.startup.Tomcat;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class MainTest {
     private Main main = new Main();
 
     @Test
-    @Ignore("Ignoring slow test")
     public void testRunStartsTomcat() throws Exception {
         Tomcat tomcat = main.run("http://localhost:8888");
         Assert.assertNotNull(tomcat);
