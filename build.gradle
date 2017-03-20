@@ -56,7 +56,7 @@ dependencies {
 
     compile("org.springframework.cloud:spring-cloud-config-client:1.2.3.RELEASE")
 
-    compile("com.github.pivotalservices:tomcat-launcher:395c378")
+    compile("com.github.pivotalservices:tomcat-launcher:3844a17")
 
     runtime('mysql:mysql-connector-java:6.0.5')
     runtime("org.apache.tomcat:tomcat-dbcp:${tomcatVersion}")
