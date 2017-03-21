@@ -51,12 +51,13 @@ public class Main {
         if (cloud != null) {
             System.out.println("We're in the cloud!");
             MysqlServiceInfo service = (MysqlServiceInfo) cloud.getServiceInfo(serviceName);
-            credentials.put("jdbcUrl", service.getJdbcUrl());
+            credentials.put("url", service.getJdbcUrl());
             credentials.put("username", service.getUserName());
             credentials.put("password", service.getPassword());
         }
-        credentials.put("serviceName", PREFIX_JDBC + serviceName);
+        credentials.put("name", PREFIX_JDBC + serviceName);
         credentials.put("driverClassName", "com.mysql.cj.jdbc.Driver");
+        credentials.put("factory", "org.apache.tomcat.jdbc.pool.DataSourceFactory");
         return credentials;
     }
 
