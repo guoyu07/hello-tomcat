@@ -2,6 +2,8 @@ package io.pivotal.hellotomcat.launch;
 
 import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
 import io.pivotal.launch.TomcatConfigurer;
+import io.pivotal.springcloud.ssl.CloudFoundryCertificateTruster;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.springframework.cloud.Cloud;
@@ -15,10 +17,11 @@ public class Main {
 
     public static final String PREFIX_JDBC = "jdbc/";
 
+    public static final CloudFoundryCertificateTruster truster = new CloudFoundryCertificateTruster();
+
     private final TomcatConfigurer tomcatConfigurer = new TomcatConfigurer();
 
     public static void main(String[] args) throws Exception {
-
         Main main = new Main();
         main.run(args[0]).getServer().await();
     }
@@ -38,7 +41,7 @@ public class Main {
     private void setupContext(Context ctx, PropertySource source) throws Exception {
 
         ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo"));
-        if (isConfigServerLocal(source)) {
+        if (useEncryptedConfig(source)) {
             ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "secret"));
             ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "custom-secret"));
         }
@@ -61,8 +64,8 @@ public class Main {
         return credentials;
     }
 
-    private boolean isConfigServerLocal(PropertySource source) {
-        return source.getProperty("CONFIG_LOCAL") != null &&
-                Boolean.valueOf(source.getProperty("CONFIG_LOCAL").toString());
+    private boolean useEncryptedConfig(PropertySource source) {
+        return source.getProperty("USE_ENCRYPT") != null &&
+                Boolean.valueOf(source.getProperty("USE_ENCRYPT").toString());
     }
 }
