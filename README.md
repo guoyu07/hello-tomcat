@@ -13,10 +13,14 @@ and JNDI to register a data source from properties read from the environment.
     $ ./mvnw spring-boot:run -Dspring.cloud.config.server.git.uri=https://github.com/malston/config-repo
     ```
 
-	```
-	$ ./gradlew clean build
-	$ java -jar build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar "http://localhost:8888"
-	```
+* Run the app
+    ```
+    $ ./gradlew clean build
+    $ java -jar build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar "http://localhost:8888"
+    ```
+* Hit the URL
+
+    The app exposes a `/hello` endpoint that will print the value of `foo` value in the config. If you give it a query string parameter then you can print your name like this:  http://localhost:8888/hello?name=Jerry
 
 * If you want to fetch encrypted values then you have to set `USE_ENCRYPT` to `true`.
 
