@@ -1,8 +1,4 @@
 buildscript {
-    ext {
-        buildNrLoc = project.hasProperty('buildNr') ? "${buildNr}" : "0.0.1-SNAPSHOT"
-
-    }
     repositories {
         mavenLocal()
         jcenter()
@@ -14,9 +10,13 @@ buildscript {
     }
 }
 
+
 apply plugin: 'java'
-apply plugin: 'eclipse'
+apply plugin: 'maven'
 apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+apply from: 'gradle/pipeline.gradle'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 jar {
@@ -26,7 +26,13 @@ jar {
 }
 
 group = 'io.pivotal'
-version = buildNrLoc
+version = getProp('newVersion') ?: '0.0.1-SNAPSHOT'
+
+ext {
+    projectGroupId = project.group
+    projectArtifactId = project.name
+    projectVersion = project.version
+}
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
@@ -48,6 +54,7 @@ dependencies {
     compile("org.apache.tomcat:tomcat-jasper-el:${tomcatVersion}")
     compile("org.apache.tomcat:tomcat-jsp-api:${tomcatVersion}")
     compile("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
+    compile("io.pivotal.spring.cloud:cloudfoundry-certificate-truster:1.0.1.RELEASE")
 
     // If you intend to deploy the app to Cloud Foundry
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.2.3.RELEASE")
@@ -57,11 +64,20 @@ dependencies {
     compile("org.springframework.cloud:spring-cloud-config-client:1.2.3.RELEASE")
 
     compile("com.github.pivotalservices:tomcat-launcher:69f9bf2")
+    compile("log4j:log4j:1.2.17")
+    compile("org.slf4j:slf4j-api:1.7.25")
+    compile("org.slf4j:slf4j-log4j12:1.7.25")
 
     runtime('mysql:mysql-connector-java:6.0.5')
     runtime("org.apache.tomcat:tomcat-dbcp:${tomcatVersion}")
 
     testCompile("junit:junit:4.12")
+}
+
+String getProp(String propName) {
+	return hasProperty(propName) ?
+			(getProperty(propName) ?: System.properties[propName]) : System.properties[propName] ?:
+			System.getenv(propName)
 }
 
 build.dependsOn('shadowJar')
