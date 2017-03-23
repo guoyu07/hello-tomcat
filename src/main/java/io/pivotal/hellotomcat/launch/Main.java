@@ -38,7 +38,7 @@ public class Main {
     private void setupContext(Context ctx, PropertySource<?> source) throws Exception {
 
         ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo"));
-        ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "newprop"));
+//        ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "newprop"));
         if (useEncryptedConfig(source)) {
             ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "secret"));
             ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "custom-secret"));
@@ -55,6 +55,10 @@ public class Main {
             credentials.put("url", service.getJdbcUrl());
             credentials.put("username", service.getUserName());
             credentials.put("password", service.getPassword());
+        } else {
+        	credentials.put("url", "jdbc:mysql://localhost/mysql?useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+            credentials.put("username", "root");
+            credentials.put("password", "password");
         }
         credentials.put("name", PREFIX_JDBC + serviceName);
         credentials.put("driverClassName", "com.mysql.cj.jdbc.Driver");
