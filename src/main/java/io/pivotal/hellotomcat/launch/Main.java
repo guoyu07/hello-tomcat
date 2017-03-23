@@ -2,7 +2,6 @@ package io.pivotal.hellotomcat.launch;
 
 import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
 import io.pivotal.launch.TomcatConfigurer;
-import io.pivotal.springcloud.ssl.CloudFoundryCertificateTruster;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
