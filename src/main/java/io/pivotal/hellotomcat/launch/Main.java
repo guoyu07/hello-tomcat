@@ -17,9 +17,7 @@ public class Main {
 
     public static final String PREFIX_JDBC = "jdbc/";
 
-    public static final CloudFoundryCertificateTruster truster = new CloudFoundryCertificateTruster();
-
-    private final TomcatConfigurer tomcatConfigurer = new TomcatConfigurer();
+    private TomcatConfigurer tomcatConfigurer;
 
     public static void main(String[] args) throws Exception {
         Main main = new Main();
@@ -28,8 +26,10 @@ public class Main {
 
     public Tomcat run(String configServerUrl) throws Exception {
         Tomcat tomcat = new Tomcat();
+        tomcatConfigurer = new TomcatConfigurer(configServerUrl);
         Context ctx = tomcatConfigurer.createStandardContext(tomcat);
-        PropertySource source = tomcatConfigurer.loadConfiguration(configServerUrl);
+        String[] profiles = {"default"};
+        PropertySource<?> source = tomcatConfigurer.loadConfiguration("hello-tomcat", profiles);
 
         setupContext(ctx, source);
 
@@ -38,9 +38,10 @@ public class Main {
         return tomcat;
     }
 
-    private void setupContext(Context ctx, PropertySource source) throws Exception {
+    private void setupContext(Context ctx, PropertySource<?> source) throws Exception {
 
         ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo"));
+        ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "newprop"));
         if (useEncryptedConfig(source)) {
             ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "secret"));
             ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "custom-secret"));
@@ -64,7 +65,7 @@ public class Main {
         return credentials;
     }
 
-    private boolean useEncryptedConfig(PropertySource source) {
+    private boolean useEncryptedConfig(PropertySource<?> source) {
         return source.getProperty("USE_ENCRYPT") != null &&
                 Boolean.valueOf(source.getProperty("USE_ENCRYPT").toString());
     }
