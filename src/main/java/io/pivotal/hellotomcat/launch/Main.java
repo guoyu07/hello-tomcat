@@ -2,7 +2,6 @@ package io.pivotal.hellotomcat.launch;
 
 import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
 import io.pivotal.launch.TomcatConfigurer;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.springframework.cloud.Cloud;
@@ -27,8 +26,7 @@ public class Main {
         Tomcat tomcat = new Tomcat();
         tomcatConfigurer = new TomcatConfigurer(configServerUrl);
         Context ctx = tomcatConfigurer.createStandardContext(tomcat);
-        String[] profiles = {"default"};
-        PropertySource<?> source = tomcatConfigurer.loadConfiguration("hello-tomcat", profiles);
+        PropertySource<?> source = tomcatConfigurer.loadConfiguration("hello-tomcat", new String[]{"default"});
 
         setupContext(ctx, source);
 
