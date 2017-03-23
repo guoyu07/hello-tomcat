@@ -24,9 +24,11 @@ public class Main {
 
     public Tomcat run(String configServerUrl) throws Exception {
         Tomcat tomcat = new Tomcat();
-        tomcatConfigurer = new TomcatConfigurer(configServerUrl);
+        tomcatConfigurer = new TomcatConfigurer(configServerUrl, "foo", new String[]{"development", "db"});
+        tomcatConfigurer.setPathToWebXml("src/main/webapp/WEB-INF/web.xml");
+        tomcatConfigurer.setWebappPath("src/main/webapp");
         Context ctx = tomcatConfigurer.createStandardContext(tomcat);
-        PropertySource<?> source = tomcatConfigurer.loadConfiguration("hello-tomcat", new String[]{"default"});
+        PropertySource<?> source = tomcatConfigurer.loadConfiguration();
 
         setupContext(ctx, source);
 
@@ -36,9 +38,9 @@ public class Main {
     }
 
     private void setupContext(Context ctx, PropertySource<?> source) throws Exception {
-
         ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo"));
-//        ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "newprop"));
+        ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "newprop"));
+        ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo.db"));
         if (useEncryptedConfig(source)) {
             ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "secret"));
             ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "custom-secret"));

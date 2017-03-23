@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app id="WebApp">
+
+	<display-name>Hello World</display-name>
+
+	<context-param>
+		<param-name>version</param-name>
+		<param-value>1.6</param-value>
+	</context-param>
+
+	<servlet>
+		<servlet-name>MyServlet</servlet-name>
+		<servlet-class>io.pivotal.hellotomcat.servlet.HelloServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>MyServlet</servlet-name>
+		<url-pattern>/hello</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+	<resource-ref id="hello-db">
+		<description>DataSource</description>
+		<res-ref-name>jdbc/hello-db</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+
+</web-app>
