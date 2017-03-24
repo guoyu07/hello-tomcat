@@ -15,6 +15,8 @@ import javax.sql.DataSource;
 
 public class HelloServlet extends HttpServlet {
 
+	private static final long serialVersionUID = -7408787806734219962L;
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 

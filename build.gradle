@@ -54,7 +54,7 @@ dependencies {
     compile("org.apache.tomcat:tomcat-jsp-api:${tomcatVersion}")
     compile("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
     runtime("org.apache.tomcat:tomcat-dbcp:${tomcatVersion}")
-    compile("com.github.pivotalservices:tomcat-launcher:84524ba")
+    compile("com.github.pivotalservices:tomcat-launcher:a6297f0")
 
     // If you intend to deploy the app to Cloud Foundry
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.2.3.RELEASE")

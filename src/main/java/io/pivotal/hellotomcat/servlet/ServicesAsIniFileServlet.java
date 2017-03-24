@@ -15,7 +15,10 @@ import java.util.Properties;
 
 @WebServlet("/ini")
 public class ServicesAsIniFileServlet extends HttpServlet {
-    @Override
+
+	private static final long serialVersionUID = -6661578632316447941L;
+
+	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         CloudFactory cloudFactory = new CloudFactory();
         Cloud cloud = null;
