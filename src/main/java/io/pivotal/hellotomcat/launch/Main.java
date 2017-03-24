@@ -70,14 +70,14 @@ public class Main {
 			credentials.put("username", service.getUserName());
 			credentials.put("password", service.getPassword());
 		} else {
-			credentials.put("url",
-					"jdbc:mysql://localhost/mysql?useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
+			credentials.put("url", "jdbc:mysql://localhost/mysql?useSSL=false");
 			credentials.put("username", "root");
 			credentials.put("password", "password");
 		}
 		credentials.put("name", PREFIX_JDBC + serviceName);
 		credentials.put("driverClassName", "com.mysql.cj.jdbc.Driver");
 		credentials.put("factory", "org.apache.tomcat.jdbc.pool.DataSourceFactory");
+		credentials.put("connectionProperties", "useUnicode=true;useJDBCCompliantTimezoneShift=true;useLegacyDatetimeCode=false;serverTimezone=UTC;");
 		return credentials;
 	}
 
