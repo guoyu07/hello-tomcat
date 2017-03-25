@@ -1,7 +1,8 @@
 package io.pivotal.hellotomcat.launch;
 
 import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
-import io.pivotal.launch.TomcatConfigurer;
+import io.pivotal.tomcat.launch.TomcatLaunchConfigurer;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.springframework.cloud.Cloud;
@@ -15,7 +16,7 @@ public class Main {
 
 	public static final String PREFIX_JDBC = "jdbc/";
 
-	private TomcatConfigurer tomcatConfigurer;
+	private TomcatLaunchConfigurer tomcatConfigurer;
 
 	public static void main(String[] args) throws Exception {
 		Main main = new Main();
@@ -24,10 +25,10 @@ public class Main {
 
 	public Tomcat run(String configServerUrl) throws Exception {
 		Tomcat tomcat = new Tomcat();
-		tomcatConfigurer = new TomcatConfigurer(configServerUrl, "foo", new String[] { "development", "db" });
+		tomcatConfigurer = new TomcatLaunchConfigurer(configServerUrl, "foo", new String[] { "development", "db" });
 		tomcatConfigurer.setRelativeWebContentFolder("src/main/webapp");
 		Context ctx = tomcatConfigurer.createStandardContext(tomcat);
-		PropertySource<?> source = tomcatConfigurer.loadConfiguration();
+		PropertySource<?> source = tomcatConfigurer.getPropertySource();
 
 		setupContextEnvironment(ctx, source);
 
