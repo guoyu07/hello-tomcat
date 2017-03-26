@@ -73,8 +73,9 @@ dependencies {
     compile("org.slf4j:slf4j-api:1.7.25")
     compile("org.slf4j:slf4j-log4j12:1.7.25")
 
-    runtime('mysql:mysql-connector-java:6.0.5')
-
+    // runtime('mysql:mysql-connector-java:6.0.5')
+    runtime('org.mariadb.jdbc:mariadb-java-client:1.5.7')
+    
     testCompile("junit:junit:4.12")
 }
 
