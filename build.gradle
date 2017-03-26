@@ -24,6 +24,12 @@ jar {
     }
 }
 
+shadowJar {
+    from('src/main/webapp') {
+       include '**/*'
+    }
+}
+
 group = 'io.pivotal'
 version = getProp('newVersion') ?: '0.0.1-SNAPSHOT'
 
