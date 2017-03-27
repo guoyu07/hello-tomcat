@@ -28,6 +28,7 @@ shadowJar {
     from('src/main/webapp') {
        include '**/*'
     }
+    mergeServiceFiles()
 }
 
 group = 'io.pivotal'
@@ -60,7 +61,7 @@ dependencies {
     compile("org.apache.tomcat:tomcat-jsp-api:${tomcatVersion}")
     compile("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
     runtime("org.apache.tomcat:tomcat-dbcp:${tomcatVersion}")
-    compile("com.github.pivotalservices:tomcat-launcher:d47064e")
+    compile("com.github.pivotalservices:tomcat-launcher:d83ad15")
 
     // If you intend to deploy the app to Cloud Foundry
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.2.3.RELEASE")
