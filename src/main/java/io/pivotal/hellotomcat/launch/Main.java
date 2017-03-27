@@ -1,8 +1,7 @@
 package io.pivotal.hellotomcat.launch;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
+import io.pivotal.tomcat.launch.TomcatLaunchConfigurer;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
@@ -10,8 +9,8 @@ import org.springframework.cloud.Cloud;
 import org.springframework.cloud.service.common.MysqlServiceInfo;
 import org.springframework.core.env.PropertySource;
 
-import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
-import io.pivotal.tomcat.launch.TomcatLaunchConfigurer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
 
@@ -26,8 +25,7 @@ public class Main {
 
 	public Tomcat run(String configServerUrl) throws Exception {
 		Tomcat tomcat = new Tomcat();
-		tomcatConfigurer = new TomcatLaunchConfigurer(configServerUrl, "foo", new String[] { "development", "db" });
-		tomcatConfigurer.setRelativeWebContentFolder("src/main/webapp");
+		tomcatConfigurer = new TomcatLaunchConfigurer(configServerUrl, "foo", new String[] { "default", "development", "db" });
 		Context ctx = tomcatConfigurer.createStandardContext(tomcat);
 		PropertySource<?> source = tomcatConfigurer.getPropertySource();
 
@@ -44,7 +42,7 @@ public class Main {
 
 	private void setupContextEnvironment(Context ctx, PropertySource<?> source) throws Exception {
 		ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo"));
-//		ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "newprop"));
+		ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "newprop"));
 		ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo.db"));
 		if (useEncryptedConfig(source)) {
 			ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "secret"));
