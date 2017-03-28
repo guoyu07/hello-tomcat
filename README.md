@@ -20,7 +20,7 @@ and JNDI to register a data source from properties read from the environment.
     ```
 * Hit the URL
 
-    The app exposes a `/hello` endpoint that will print the value of `foo` value in the config. If you give it a query string parameter then you can print your name like this:  http://localhost:8888/hello?name=Jerry
+    The app exposes a `/hello` endpoint that will print the value of `foo` value in the config. If you give it a query string parameter then you can print your name like this:  http://localhost:8080/hello?name=Jerry
 
 * If you want to fetch encrypted values then you have to set `USE_ENCRYPT` to `true`.
 
