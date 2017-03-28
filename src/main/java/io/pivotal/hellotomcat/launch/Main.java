@@ -25,11 +25,14 @@ public class Main {
 
 	public Tomcat run(String configServerUrl) throws Exception {
 		Tomcat tomcat = new Tomcat();
-		tomcatConfigurer = new TomcatLaunchConfigurer(configServerUrl, "foo", new String[] { "default", "development", "db" });
+		// Create a system property in the run configuration: "SPRING_PROFILES_ACTIVE", "default,development,db");
+		tomcatConfigurer = new TomcatLaunchConfigurer(configServerUrl, "foo", null);
 		Context ctx = tomcatConfigurer.createStandardContext(tomcat);
 		PropertySource<?> source = tomcatConfigurer.getPropertySource();
 
 		setupContextEnvironment(ctx, source);
+
+		System.out.println("Getting prop directly from config server: " + tomcatConfigurer.getPropertySource().getProperty("foo"));
 
 		tomcat.enableNaming();
 		tomcat.start();
