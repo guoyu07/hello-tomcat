@@ -7,6 +7,6 @@ applications:
 services:
   - hello-db
 env:
-  SPRING_PROFILES_ACTIVE: cloud
+  SPRING_PROFILES_ACTIVE: development,db
   JBP_CONFIG_JAVA_MAIN: '{ arguments: "https://configserver-peacocky-dactylographer.cfapps.pez.pivotal.io" }'
   USE_ENCRYPT: true
