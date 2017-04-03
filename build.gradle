@@ -53,26 +53,19 @@ repositories {
 }
 
 dependencies {
-    compile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-    compile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
-    compile("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}")
-    compile("org.apache.tomcat:tomcat-jasper:${tomcatVersion}")
-    compile("org.apache.tomcat:tomcat-jasper-el:${tomcatVersion}")
-    compile("org.apache.tomcat:tomcat-jsp-api:${tomcatVersion}")
-    compile("org.apache.tomcat:tomcat-jdbc:${tomcatVersion}")
-    runtime("org.apache.tomcat:tomcat-dbcp:${tomcatVersion}")
-    compile("com.github.pivotalservices:tomcat-launcher:3e6f4a0")
+    compile("com.github.pivotalservices:tomcat-launcher:3e6f4a0") {
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+    }
 
     // If you intend to deploy the app to Cloud Foundry
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.2.3.RELEASE")
     // To use Spring Cloud Connectors for development
-    compile("org.springframework.cloud:spring-cloud-localconfig-connector:1.2.3.RELEASE")
+    compile("org.springframework.cloud:spring-cloud-localconfig-connector:1.2.3.RELEASE") {
+        exclude group: "org.springframework.boot:spring-boot-starter-tomcat"
+    }
 
     compile("log4j:log4j:1.2.17")
-    compile("org.slf4j:slf4j-api:1.7.25")
-    compile("org.slf4j:slf4j-log4j12:1.7.25")
 
-    // runtime('mysql:mysql-connector-java:6.0.5')
     runtime('org.mariadb.jdbc:mariadb-java-client:1.5.7')
 
     testCompile("junit:junit:4.12")
