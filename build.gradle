@@ -53,9 +53,7 @@ repositories {
 }
 
 dependencies {
-    compile("com.github.pivotalservices:tomcat-launcher:3e6f4a0") {
-        exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
-    }
+    compile("com.github.pivotalservices:tomcat-launcher:3472138")
 
     // If you intend to deploy the app to Cloud Foundry
     compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.2.3.RELEASE")
