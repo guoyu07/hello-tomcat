@@ -19,9 +19,9 @@ public class MainTest extends Assert {
     public void testRunStartsTomcat() throws Exception {
         environmentVariables.set("SPRING_PROFILES_ACTIVE", "development,db");
         Tomcat tomcat = main.run("http://localhost:8888");
-        Assert.assertNotNull(tomcat);
+        assertNotNull(tomcat);
         StandardServer server = (StandardServer) tomcat.getServer();
-        Assert.assertNotNull(server);
+        assertNotNull(server);
         server.stopAwait();
     }
 
