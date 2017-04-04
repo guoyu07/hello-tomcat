@@ -64,8 +64,27 @@ dependencies {
 
     runtime('org.mariadb.jdbc:mariadb-java-client:1.5.7')
 
-    testCompile("junit:junit:4.12")
+    testCompile("com.github.stefanbirkner:system-rules:1.16.1")
 }
+
+tasks.withType(Test) {
+    reports.html.destination = file("${reporting.baseDir}/${name}")
+}
+
+test {
+    useJUnit {
+        excludeCategories 'io.pivotal.hellotomcat.launch.IntegrationTest'
+    }
+}
+
+task integrationTest(type: Test) {
+    useJUnit {
+        includeCategories 'io.pivotal.hellotomcat.launch.IntegrationTest'
+    }
+}
+
+//check.dependsOn integrationTest
+integrationTest.mustRunAfter test
 
 String getProp(String propName) {
 	return hasProperty(propName) ?
