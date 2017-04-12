@@ -8,7 +8,7 @@ services:
   - hello-db
   - config-server
 env:
-  CF_TARGET: https://api.cf.markalston.net
+  TRUST_CERTS: api.cf.markalston.net,p-spring-cloud-services.uaa.cf.markalston.net
   SPRING_PROFILES_ACTIVE: cloud,development,db
 #  JBP_CONFIG_JAVA_MAIN: '{ arguments: "https://configserver-peacocky-dactylographer.cfapps.pez.pivotal.io" }'
   USE_ENCRYPT: false

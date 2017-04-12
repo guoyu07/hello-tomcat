@@ -2,6 +2,7 @@ package io.pivotal.hellotomcat.launch;
 
 import io.pivotal.config.client.ConfigClientTemplate;
 import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
+import io.pivotal.spring.cloud.service.common.ConfigServerServiceInfo;
 import io.pivotal.springcloud.ssl.CloudFoundryCertificateTruster;
 import io.pivotal.tomcat.launch.TomcatLaunchConfigurer;
 import org.apache.catalina.Context;
@@ -10,9 +11,11 @@ import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.springframework.cloud.Cloud;
 import org.springframework.cloud.CloudException;
 import org.springframework.cloud.service.ServiceInfo;
-import org.springframework.cloud.service.UriBasedServiceInfo;
 import org.springframework.cloud.service.common.MysqlServiceInfo;
 import org.springframework.core.env.PropertySource;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,19 +39,27 @@ public class Main {
 
 	public Tomcat run(String configServerUrl) throws Exception {
 		Tomcat tomcat = new Tomcat();
+        RestTemplate restTemplate = null;
 		if (configServerUrl == null || "".equals(configServerUrl)) {
-            UriBasedServiceInfo service = (UriBasedServiceInfo) getServiceInfo("config-server");
+            ConfigServerServiceInfo service = (ConfigServerServiceInfo) getServiceInfo("config-server");
             configServerUrl = service.getUri();
+            ClientCredentialsResourceDetails ccrd = new ClientCredentialsResourceDetails();
+            ccrd.setAccessTokenUri(service.getAccessTokenUri());
+            ccrd.setClientId(service.getClientId());
+            ccrd.setClientSecret(service.getClientSecret());
+            restTemplate = new OAuth2RestTemplate(ccrd);
         }
-		// Create a system property in the run configuration: "SPRING_PROFILES_ACTIVE", "default,development,db"
-        // Or if running in the cloud, get from env
-		tomcatConfigurer = new TomcatLaunchConfigurer(new ConfigClientTemplate<>(configServerUrl, "hello-tomcat", new String[] {"cloud,development,db"}));
-		Context ctx = tomcatConfigurer.createStandardContext(tomcat);
-		PropertySource<?> source = tomcatConfigurer.getPropertySource();
+        // If running locally, create a system property in the run configuration: "SPRING_PROFILES_ACTIVE", "development,db"
+        ConfigClientTemplate configClient = new ConfigClientTemplate<>(restTemplate, configServerUrl, "hello-tomcat", null, true);
+
+		tomcatConfigurer = new TomcatLaunchConfigurer();
+        Context ctx = tomcatConfigurer.createStandardContext(tomcat);
+
+		PropertySource<?> source = configClient.getPropertySource();
 
 		setupContextEnvironment(ctx, source);
 
-		System.out.println("Getting prop directly from config server: " + tomcatConfigurer.getPropertySource().getProperty("foo"));
+		System.out.println("Getting prop directly from config server: " + configClient.getProperty("foo"));
 
 		tomcat.enableNaming();
 		tomcat.start();
