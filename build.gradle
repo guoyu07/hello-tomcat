@@ -6,6 +6,7 @@ buildscript {
         maven { url 'https://repo.spring.io/plugins-release' }
     }
     dependencies {
+        classpath("io.spring.gradle:dependency-management-plugin:0.6.1.RELEASE")
         classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
     }
 }
@@ -53,12 +54,19 @@ repositories {
 }
 
 dependencies {
-    compile("com.github.pivotalservices:tomcat-launcher:3472138")
+    compile("com.github.pivotalservices:tomcat-launcher:7a8f023")
 
+//    compile("org.springframework.cloud:spring-cloud-spring-service-connector:1.2.3.RELEASE")
     // If you intend to deploy the app to Cloud Foundry
-    compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.2.3.RELEASE")
+//    compile("org.springframework.cloud:spring-cloud-cloudfoundry-connector:1.2.3.RELEASE")
     // To use Spring Cloud Connectors for development
     compile("org.springframework.cloud:spring-cloud-localconfig-connector:1.2.3.RELEASE")
+
+    // If you intend to deploy the app to Pivotal Cloud Foundry
+    compile("io.pivotal.spring.cloud:spring-cloud-services-cloudfoundry-connector:1.4.1.RELEASE")
+    compile("io.pivotal.spring.cloud:spring-cloud-services-starter-config-client:1.4.1.RELEASE") {
+        exclude group: 'org.apache.tomcat.embed'
+    }
 
     compile("log4j:log4j:1.2.17")
 
