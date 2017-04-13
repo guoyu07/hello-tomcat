@@ -6,7 +6,9 @@ applications:
   path: build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar
 services:
   - hello-db
+  - config-server
 env:
-  SPRING_PROFILES_ACTIVE: development,db
-  JBP_CONFIG_JAVA_MAIN: '{ arguments: "https://configserver-peacocky-dactylographer.cfapps.pez.pivotal.io" }'
-  USE_ENCRYPT: true
+  TRUST_CERTS: api.cf.markalston.net,p-spring-cloud-services.uaa.cf.markalston.net
+  SPRING_PROFILES_ACTIVE: cloud,development,db
+#  JBP_CONFIG_JAVA_MAIN: '{ arguments: "https://configserver-peacocky-dactylographer.cfapps.pez.pivotal.io" }'
+  USE_ENCRYPT: false

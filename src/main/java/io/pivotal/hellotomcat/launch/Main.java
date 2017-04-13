@@ -1,13 +1,21 @@
 package io.pivotal.hellotomcat.launch;
 
+import io.pivotal.config.client.ConfigClientTemplate;
 import io.pivotal.hellotomcat.cloud.CloudInstanceHolder;
+import io.pivotal.spring.cloud.service.common.ConfigServerServiceInfo;
+import io.pivotal.springcloud.ssl.CloudFoundryCertificateTruster;
 import io.pivotal.tomcat.launch.TomcatLaunchConfigurer;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.descriptor.web.ContextResource;
 import org.springframework.cloud.Cloud;
+import org.springframework.cloud.CloudException;
+import org.springframework.cloud.service.ServiceInfo;
 import org.springframework.cloud.service.common.MysqlServiceInfo;
 import org.springframework.core.env.PropertySource;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,21 +26,40 @@ public class Main {
 
 	private TomcatLaunchConfigurer tomcatConfigurer;
 
+    public static final CloudFoundryCertificateTruster truster = new CloudFoundryCertificateTruster();
+
 	public static void main(String[] args) throws Exception {
 		Main main = new Main();
-		main.run(args[0]).getServer().await();
+		if (args.length == 1) {
+            main.run(args[0]).getServer().await();
+        } else {
+            main.run(null).getServer().await();
+        }
 	}
 
 	public Tomcat run(String configServerUrl) throws Exception {
 		Tomcat tomcat = new Tomcat();
-		// Create a system property in the run configuration: "SPRING_PROFILES_ACTIVE", "default,development,db");
-		tomcatConfigurer = new TomcatLaunchConfigurer(configServerUrl, "foo", null);
-		Context ctx = tomcatConfigurer.createStandardContext(tomcat);
-		PropertySource<?> source = tomcatConfigurer.getPropertySource();
+        RestTemplate restTemplate = null;
+		if (configServerUrl == null || "".equals(configServerUrl)) {
+            ConfigServerServiceInfo service = (ConfigServerServiceInfo) getServiceInfo("config-server");
+            configServerUrl = service.getUri();
+            ClientCredentialsResourceDetails ccrd = new ClientCredentialsResourceDetails();
+            ccrd.setAccessTokenUri(service.getAccessTokenUri());
+            ccrd.setClientId(service.getClientId());
+            ccrd.setClientSecret(service.getClientSecret());
+            restTemplate = new OAuth2RestTemplate(ccrd);
+        }
+        // If running locally, create a system property in the run configuration: "SPRING_PROFILES_ACTIVE", "development,db"
+        ConfigClientTemplate configClient = new ConfigClientTemplate<>(restTemplate, configServerUrl, "hello-tomcat", null, true);
+
+		tomcatConfigurer = new TomcatLaunchConfigurer();
+        Context ctx = tomcatConfigurer.createStandardContext(tomcat);
+
+		PropertySource<?> source = configClient.getPropertySource();
 
 		setupContextEnvironment(ctx, source);
 
-		System.out.println("Getting prop directly from config server: " + tomcatConfigurer.getPropertySource().getProperty("foo"));
+		System.out.println("Getting prop directly from config server: " + configClient.getProperty("foo"));
 
 		tomcat.enableNaming();
 		tomcat.start();
@@ -57,7 +84,7 @@ public class Main {
 		Cloud cloud = CloudInstanceHolder.getCloudInstance();
 		if (cloud != null) {
 			System.out.println("Creating datasource from spring-cloud-connector and adding extra props to it");
-			ContextResource resource = tomcatConfigurer.createContainerDataSource(this.getServiceConfig("hello-db"));
+			ContextResource resource = tomcatConfigurer.createContainerDataSource(this.getMysqlConnectionProperties("hello-db"));
 			resource.setProperty("removeAbandonedTimeout", "60");
 			resource.setProperty("testWhileIdle", "true");
 			resource.setProperty("timeBetweenEvictionRunsMillis", "300000");
@@ -66,11 +93,19 @@ public class Main {
 			System.out.println("Container datasource already registered in context.");
 		} else {
 			System.out.println("Container datasource not registered in context.");
-			ctx.getNamingResources().addResource(tomcatConfigurer.createContainerDataSource(this.getServiceConfig("hello-db")));
+			ctx.getNamingResources().addResource(tomcatConfigurer.createContainerDataSource(this.getMysqlConnectionProperties("hello-db")));
 		}
 	}
 
-	private Map<String, Object> getServiceConfig(String serviceName) {
+    private ServiceInfo getServiceInfo(String serviceName) {
+        Cloud cloud = CloudInstanceHolder.getCloudInstance();
+        if (cloud == null) {
+            throw new CloudException("No suitable cloud connector found");
+        }
+        return cloud.getServiceInfo(serviceName);
+    }
+
+	private Map<String, Object> getMysqlConnectionProperties(String serviceName) {
 		Map<String, Object> credentials = new HashMap<>();
 		Cloud cloud = CloudInstanceHolder.getCloudInstance();
 		if (cloud != null) {
