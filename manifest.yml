@@ -3,7 +3,7 @@ applications:
 - name: hello-tomcat
   memory: 512MB
   buildpack: java_buildpack_offline
-  path: build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar
+  path: build/libs/hello-tomcat-0.0.1-SNAPSHOT.jar
 services:
   - hello-db
   - config-server
