@@ -40,7 +40,7 @@ public class WebMain {
             }
         }
         // If running locally, create a system property in the run configuration: "SPRING_PROFILES_ACTIVE", "development,db"
-        ConfigClientTemplate configClient = new ConfigClientTemplate<>(restTemplate, configServerUrl, "hello-tomcat", null, false);
+        ConfigClientTemplate configClient = new ConfigClientTemplate<>(restTemplate, configServerUrl, "foo", null, false);
 
         System.out.println("Getting prop directly from config server: " + configClient.getProperty("foo"));
 
