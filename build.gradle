@@ -21,7 +21,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 jar {
     manifest {
-        attributes("Main-Class": "io.pivotal.hellotomcat.launch.Main")
+        attributes("Main-Class": "io.pivotal.hellotomcat.launch.WebMain")
     }
 }
 
@@ -29,6 +29,7 @@ shadowJar {
     from('src/main/webapp') {
        include '**/*'
     }
+    classifier = null
     exclude 'Class50/**'
     exclude 'lombok/**'
     exclude '**/AUTHORS'
@@ -67,7 +68,7 @@ repositories {
 }
 
 dependencies {
-    compile("com.github.pivotalservices:tomcat-launcher:d5c5fbd")
+    compile("com.github.pivotalservices:tomcat-launcher:edc72cb")
     compile("com.github.pivotalservices:spring-cloud-config-java-client:1f5a51f")
 
 //    compile("org.springframework.cloud:spring-cloud-spring-service-connector:1.2.3.RELEASE")

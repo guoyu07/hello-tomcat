@@ -16,7 +16,7 @@ and JNDI to register a data source from properties read from the environment.
 * Run the app
     ```
     $ ./gradlew clean build
-    $ SPRING_PROFILES_ACTIVE=db,development java -jar build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar "http://localhost:8888"
+    $ SPRING_PROFILES_ACTIVE=db,development java -jar build/libs/hello-tomcat-0.0.1-SNAPSHOT.jar "http://localhost:8888"
     ```
 * Hit the URL
 
@@ -25,7 +25,7 @@ and JNDI to register a data source from properties read from the environment.
 * If you want to fetch encrypted values then you have to set `USE_ENCRYPT` to `true`.
 
 	```
-	$ SPRING_PROFILES_ACTIVE=db,development USE_ENCRYPT=true java -jar build/libs/hello-tomcat-0.0.1-SNAPSHOT-all.jar "http://localhost:8888"
+	$ SPRING_PROFILES_ACTIVE=db,development USE_ENCRYPT=true java -jar build/libs/hello-tomcat-0.0.1-SNAPSHOT.jar "http://localhost:8888"
 	```
 
 ## Run on PCF

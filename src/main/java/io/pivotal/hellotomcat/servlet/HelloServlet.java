@@ -1,6 +1,6 @@
 package io.pivotal.hellotomcat.servlet;
 
-import static io.pivotal.hellotomcat.launch.Main.PREFIX_JDBC;
+import static io.pivotal.hellotomcat.launch.JarMain.PREFIX_JDBC;
 
 import java.io.IOException;
 
