@@ -10,7 +10,7 @@ and JNDI to register a data source from properties read from the environment.
     Clone the sample [config-server](https://github.com/spring-cloud-samples/configserver) and point it to a git repo that contains your config.
 
     ```
-    $ ./mvnw spring-boot:run -Dspring.cloud.config.server.git.uri=https://github.com/malston/config-repo
+    $ ./mvnw spring-boot:run -Dspring.cloud.config.server.git.uri=https://github.com/malston/hello-tomcat-config
     ```
 
 * Run the app
@@ -74,7 +74,7 @@ See docs for [Creating a Key Store for Testing](http://cloud.spring.io/spring-cl
 2. Restart configserver with clean
 
 	```
-	$ ./mvnw spring-boot:run -Dspring.cloud.config.server.git.uri=https://github.com/malston/config-repo
+	$ ./mvnw spring-boot:run -Dspring.cloud.config.server.git.uri=https://github.com/malston/hello-tomcat-config
 	```
 
 3. Encrypt config value with key from step 1.
