@@ -50,7 +50,7 @@ public class JarMain {
         // If running locally, create a system property in the run configuration: "SPRING_PROFILES_ACTIVE", "development,db"
         ConfigClientTemplate configClient = new ConfigClientTemplate<>(restTemplate, configServerUrl, "hello-tomcat", null, false);
 
-        System.out.println("Getting prop directly from config server: " + configClient.getProperty("foo"));
+        System.out.println("Getting prop directly from config server: " + configClient.getProperty("newprop2"));
 
         PropertySource<?> source = configClient.getPropertySource();
 
