@@ -67,7 +67,7 @@ repositories {
 }
 
 dependencies {
-    compile("com.github.pivotalservices:tomcat-launcher:6f37b22")
+    compile("com.github.pivotalservices:tomcat-launcher:edc72cb")
     compile("com.github.pivotalservices:spring-cloud-config-java-client:1f5a51f")
 
 //    compile("org.springframework.cloud:spring-cloud-spring-service-connector:1.2.3.RELEASE")

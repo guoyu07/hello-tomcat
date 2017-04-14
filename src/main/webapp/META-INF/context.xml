@@ -11,7 +11,7 @@
     <!--
     <Manager pathname="" />
     -->
-     
+
     <Resource name="jdbc/hello-db"
               type="javax.sql.DataSource"
               auth="Container"

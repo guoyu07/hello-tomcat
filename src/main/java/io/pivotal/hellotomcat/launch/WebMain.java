@@ -48,7 +48,7 @@ public class WebMain {
 
         TomcatLauncher.configure()
                 .withStandardContext()
-                .defaultContextXml("src/main/webapp/META-INF/context.xml")
+                .defaultContextXml("META-INF/context.xml")
                 .addEnvironment(source, "foo")
                 .addEnvironment(source, "newprop")
                 .addEnvironment(source, "foo.db")
