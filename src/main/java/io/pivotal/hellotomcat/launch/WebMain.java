@@ -46,6 +46,7 @@ public class WebMain {
 
         PropertySource<?> source = configClient.getPropertySource();
 
+        // Uncomment the datasource in web.xml and context.xml if you want to use this method
         TomcatLauncher.configure()
                 .withStandardContext()
                 .defaultContextXml("META-INF/context.xml")
