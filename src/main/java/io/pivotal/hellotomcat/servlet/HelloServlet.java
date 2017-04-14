@@ -1,17 +1,16 @@
 package io.pivotal.hellotomcat.servlet;
 
-import static io.pivotal.hellotomcat.launch.JarMain.PREFIX_JDBC;
-
-import java.io.IOException;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import static io.pivotal.hellotomcat.launch.JarMain.PREFIX_JDBC;
 
 public class HelloServlet extends HttpServlet {
 
@@ -31,11 +30,15 @@ public class HelloServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		String foo = getFromEnvironment("foo");
-		ServletOutputStream out = resp.getOutputStream();
 		String message = "Hello " + name + "! Foo is " + foo;
-		out.write(message.getBytes());
-		out.flush();
-		out.close();
+		try (PrintWriter out = resp.getWriter()) {
+			out.println(message);
+			String fooDb = getFromEnvironment("foo.db");
+			String newProp = getFromEnvironment("newprop");
+			out.println("foo.db: " + fooDb);
+			out.println("newprop: " + newProp);
+			out.println();
+		}
 	}
 
 	public String getFromEnvironment(final String name) {
