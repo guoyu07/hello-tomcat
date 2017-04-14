@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.experimental.categories.Category;
 
-public class MainTest extends Assert {
-    private Main main = new Main();
+public class JarMainTest extends Assert {
+    private JarMain main = new JarMain();
 
     @Rule
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables();

@@ -12,13 +12,12 @@
     <Manager pathname="" />
     -->
      
-    <!--
     <Resource name="jdbc/hello-db"
               type="javax.sql.DataSource"
               auth="Container"
               username="root"
               password="password"
-              driverClassName="com.mysql.cj.jdbc.Driver"
+              driverClassName="org.mariadb.jdbc.Driver"
               factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
               url="jdbc:mysql://localhost/mysql?useSSL=false"
               removeAbandonedTimeout="60"
@@ -28,6 +27,7 @@
      	      maxActive="8"
               maxIdle="4"/>
         }
+    <!--
     -->
 
     <!-- Uncomment this to enable Comet connection tacking (provides events

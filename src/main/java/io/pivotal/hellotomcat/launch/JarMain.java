@@ -19,14 +19,14 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Main {
+public class JarMain {
 
     public static final String PREFIX_JDBC = "jdbc/";
 
     public static final CloudFoundryCertificateTruster truster = new CloudFoundryCertificateTruster();
 
     public static void main(String[] args) throws Exception {
-        Main main = new Main();
+        JarMain main = new JarMain();
         if (args.length == 1) {
             main.run(args[0]);
         } else {
@@ -63,33 +63,6 @@ public class Main {
                 .apply()
                 .launch();
     }
-
-//	private void setupContextEnvironment(Context ctx, PropertySource<?> source) throws Exception {
-//		ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo"));
-//		ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "newprop"));
-//		ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "foo.db"));
-//		if (useEncryptedConfig(source)) {
-//			ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "secret"));
-//			ctx.getNamingResources().addEnvironment(tomcatConfigurer.getEnvironment(source, "custom-secret"));
-//		}
-//	}
-
-//	private void setupContextResource(Context ctx, PropertySource<?> source) {
-//		Cloud cloud = CloudInstanceHolder.getCloudInstance();
-//		if (cloud != null) {
-//			System.out.println("Creating datasource from spring-cloud-connector and adding extra props to it");
-//			ContextResource resource = tomcatConfigurer.createContainerDataSource(this.getMysqlConnectionProperties("hello-db"));
-//			resource.setProperty("removeAbandonedTimeout", "60");
-//			resource.setProperty("testWhileIdle", "true");
-//			resource.setProperty("timeBetweenEvictionRunsMillis", "300000");
-//			ctx.getNamingResources().addResource(resource);
-//		} else if (ctx.getNamingResources().findResource(PREFIX_JDBC + "hello-db") == null) {
-//			System.out.println("Container datasource already registered in context.");
-//		} else {
-//			System.out.println("Container datasource not registered in context.");
-//			ctx.getNamingResources().addResource(tomcatConfigurer.createContainerDataSource(this.getMysqlConnectionProperties("hello-db")));
-//		}
-//	}
 
     private ContextResource createContainerDataSource(Map<String, Object> credentials) {
         System.out.println("creds: " + credentials);
